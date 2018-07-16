@@ -25,7 +25,7 @@
 <script>
   //start re-writing at 1:39 AM
     //enum
-    var black = '#EEEEEE';
+    var black = '#111111';
     var red = 'E4141B';
     var green = '#10E01B'
     // setting up the canvas and one paper tool
@@ -39,8 +39,8 @@
     var socket = new WebSocket('ws://p4-vhan168-vhan2443362.codeanyapp.com:8765/'); //socket setup
     //new Path
     var myPath = new paper.Path({
-      strokeWidth: 20,
-      strokeColor : '#EEEEEE',
+      strokeWidth: 2,
+      strokeColor : black,
 	    strokeCap: 'round'
     });
     var points = [];
