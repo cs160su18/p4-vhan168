@@ -23,7 +23,6 @@
     <canvas id="myCanvas" width="750px" height="750px"></canvas>
 </body>
 <script>
-  //start re-writing at 1:39 AM
     //enum
     var black = '#EEEEEE';
     var red = 'E4141B';
@@ -46,6 +45,7 @@
     myPath.strokeColor = 'black';
     var points = [];
     var userColor = "black";
+    
     tool.onMouseMove = function (event) {
       socket.onmessage = function(receivedMessage) {
 	      // do something when you receive a message
@@ -86,7 +86,7 @@
       //How would you represent a paper.Point() using a string? 
       //What factors of the point are important?
       //socket.send(stringify(pointStr));
-      socket.send(event.point);
+      socket.send(event.point);//可以直接传point么？
       
       
   	  // notify console if socket closes unexpectedly
@@ -107,7 +107,18 @@
       points.shift();
       myPath.strokeColor = color;
     }  
-
+    socket.onmessage = function(receivedMessage) {
+	      // do something when you receive a message
+        //console.log("Connection established!");
+      
+        console.log(receivedMessage.data);
+//         pushPoint(myPath, receivedMessage.points, red);
+        //points.push(new point(receivedMessage.data[0], receivedMessage.data[1]));
+        points.push(receivedMessage.data);
+        points.shift();
+        myPath.lineTo(receivedMessage.data);
+    }
+//   DeviceMotionEvent.DeviceMotionEvent()
 //     var handleOrientation = function(event) {
 //       //When you shake your phone, clear the canvas. 
       
