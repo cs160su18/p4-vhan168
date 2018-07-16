@@ -39,25 +39,31 @@
     var socket = new WebSocket('ws://p4-vhan168-vhan2443362.codeanyapp.com:8765/'); //socket setup
     //new Path
     var myPath = new paper.Path({
-      strokeColor = 'black'
+      strokeWidth: 20,
+      strokeColor : '#EEEEEE',
+	    strokeCap: 'round'
     });
-//     myPath.strokeColor = 'black';
     var points = [];
     var userColor = black;
   
-  
-  
-  
   //working space
   tool.onMouseMove = function(event) {
-    var msg = event.point;//as JSON
+    var msg = '{' + '"x" : ' + event.point.x + ', "y" : ' + event.point.y + ' }' ;//as JSON
     socket.send(msg);
+//     socket.send(event.);
+    var point = new paper.Point(event.data.x, event.data.y);
+    myPath.add(point);
+    myPath.smooth({ type: 'continuous' });
   }
   //
   socket.onmessage = function (event) {
     console.log(event.data);
-    points.push(event.data);
-    myPath.lineTo(event.data);
+    var pointJSON = JSON.parse(event.data);
+    var point = new paper.Point(pointJSON.x, pointJSON.y);
+    myPath.add(point);
+    myPath.smooth({ type: 'continuous' });
+//     points.push(event.data);
+//     myPath.lineTo(event.data);
   }
   // notify console if socket closes unexpectedly
   socket.onclose = function(e) {
