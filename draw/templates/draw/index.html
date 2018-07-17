@@ -8,8 +8,7 @@
 
     <link rel="stylesheet" type="text/css" href="{% static 'draw/vendor/bootstrap/css/bootstrap.min.css' %}">
     <script type="text/javascript" src="{% static 'draw/vendor/jquery/jquery-3.3.1.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'draw/vendor/paper/paper-full.min.js' %}"></script>
-
+    <script type="text/javascript" src="{% static 'draw/vendor/paper/paper-full.min.js' %}"></script>  
     <style type="text/css">
     </style>
   
@@ -28,6 +27,10 @@
     var black = '#111111';
     var red = 'E4141B';
     var green = '#10E01B'
+//     var xOrient, yOrient, zOrient;
+    var xOrient = 90;
+    var yOrient = 0;
+    var zOrient = 0;
     // setting up the canvas and one paper tool
     var canvas = document.getElementById('myCanvas');
     paper.setup(canvas);
@@ -40,24 +43,24 @@
     //new Path
     var myPath = new paper.Path({
       strokeWidth: 2,
-      strokeColor : black,
+//       strokeColor : black,
 	    strokeCap: 'round'
     });
+  myPath.strokeColor = 'red';
     var points = [];
-    var userColor = black;
+//     var userColor = black;
   
   //working space
   tool.onMouseMove = function(event) {
+//     var msg = '{' + '"x" : ' + event.point.x + ', "y" : ' + event.point.y + ' }' ;//as JSON
     var msg = '{' + '"x" : ' + event.point.x + ', "y" : ' + event.point.y + ' }' ;//as JSON
     socket.send(msg);
-//     socket.send(event.);
     var point = new paper.Point(event.data.x, event.data.y);
     myPath.add(point);
     myPath.smooth({ type: 'continuous' });
   }
-  //
   socket.onmessage = function (event) {
-    console.log(event.data);
+    //console.log(event.data);
     var pointJSON = JSON.parse(event.data);
     var point = new paper.Point(pointJSON.x, pointJSON.y);
     myPath.add(point);
@@ -69,28 +72,50 @@
   socket.onclose = function(e) {
     console.error('Chat socket closed unexpectedly');
   };
-   
+  
+//When you shake your phone, clear the canvas. 
+  //Check compatibility & set listener
+  if(window.DeviceOrientationEvent){
+    window.addEventListener("deviceorientation", orientation, false);
+  }else{
+    console.log("DeviceOrientationEvent is not supported");
+  }
+  //detect motion
+  function orientation(event) {
+    var x = event.beta;
+//     var y = event.gamma;
+    var z = event.alpha;
+    if ((event.beta != xOrient) && (event.alpha != zOrient)) {
+      console.log("Device Shaking");
+//       console.log("x"+x+", z"+z);
+      paper.project.activeLayer.removeChildren();
+      paper.view.draw();
+//       paper.project.activeLayer.addChild(myPath);
+    }
+    xOrient = x;
+    zOrient = z;
+//     console.log("xO"+xOrient+", zO"+zOrient);
+}
+  
+  //When you tilt your phone to the right (gamma), change the stroke color.
+  window.ondeviceorientation = function(event) {
+    var y = event.gamma;    //[-180, 180]
+//     console.log(event.gamma);
+    if (event.gamma > yOrient) {
+//       myPath.strokeColor.hue = Math.random() * 360;
+      myPath.strokeColor.hue = Math.abs(event.gamma) * 2;       //Hue, [0, 360]
+//       console.log(myPath.strokeColor.hue);
+    }
+    yOrient = y;
+  }
 
-//     var handleOrientation = function(event) {
-//       //When you shake your phone, clear the canvas. 
-      
-//         var x = event.gamma;
-
-//       // Part 2: Update x and y appropriately if the device is facing downwards
-//       //When you tilt your phone to the right (gamma), change the stroke color.
-//       if (x > 180) {
-//         x = 180;
-//       } else if (x < -180) {
-//         x = -180;
-//       }
-      
-//       myPath.strokeColor = new Color();
-      
-//       circle.fillColor.hue += 60;
-//       circle.fillColor.saturation = .5;
-//       circle.fillColor.brightness += .4;
-
+//   window.DeviceOrientationEvent = function(event) {
+//     var x = event.gamma;
+//     if (x > zOrient) {
+//         myPath.strokeColor.hue = Math.abs(event.gamma) * 2;
 //     }
-
+//     zOrient = x;
+//   }
+  
 </script>
 </html>
